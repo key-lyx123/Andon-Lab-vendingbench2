@@ -1,5 +1,5 @@
 """
-VendingBench2 Analysis – Visualisation
+VendingBench2 Analysis – Visualization
 Generate publication-quality figures for paper writing.
 """
 from __future__ import annotations

@@ -89,7 +89,7 @@ def main():
     )
 
     print(f"\nRun ID: {run_id}")
-    print("To analyse results: python analysis/analyze_results.py")
+    print("To analyze results: python analysis/analyze_results.py")
 
 
 if __name__ == "__main__":

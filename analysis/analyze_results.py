@@ -44,7 +44,7 @@ def print_summary_table(rows):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="VendingBench2 Results Analyser")
+    parser = argparse.ArgumentParser(description="VendingBench2 Results Analyzer")
     parser.add_argument("--db", default="vending_simulation.db",
                         help="Path to SQLite database")
     parser.add_argument("--output", default="analysis/output",

@@ -1,6 +1,6 @@
 """
 VendingBench2 - Economic Environment
-Simulates customer purchasing behaviour using price-elasticity models with
+Simulates customer purchasing behavior using price-elasticity models with
 seasonal, weather, and product-variety multipliers.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ def analyze_single_item(item_name: str, item_price: float, item_size: str,
     """
     from model_client import call_model
 
-    prompt = f"""You are an economics expert analysing customer behaviour for a vending machine item.
+    prompt = f"""You are an economics expert analyzing customer behavior for a vending machine item.
 
 CONTEXT: {context or "Standard office-building vending machine, Chicago IL"}
 
@@ -56,23 +56,23 @@ def generate_customer_behavior(vending_slots: Dict) -> Dict[str, Dict]:
     Build a {item_name -> {price_elasticity, reference_price, base_sales}} map
     for all unique items currently in the machine.
     """
-    behaviour: Dict[str, Dict] = {}
+    behavior: Dict[str, Dict] = {}
     for slot in vending_slots.values():
         item = slot.get("item")
-        if item is None or item.name in behaviour:
+        if item is None or item.name in behavior:
             continue
         pe, rp, bs = analyze_single_item(item.name, item.price, item.size, slot["quantity"])
-        behaviour[item.name] = {"price_elasticity": pe, "reference_price": rp, "base_sales": bs}
-    return behaviour
+        behavior[item.name] = {"price_elasticity": pe, "reference_price": rp, "base_sales": bs}
+    return behavior
 
 
 # ── sales calculation ──────────────────────────────────────────────────────────
 
-def calculate_item_sales(item_name: str, current_price: float, behaviour: Dict) -> int:
+def calculate_item_sales(item_name: str, current_price: float, behavior: Dict) -> int:
     """Base sales adjusted for price vs. reference price."""
-    if item_name not in behaviour:
+    if item_name not in behavior:
         return 0
-    m = behaviour[item_name]
+    m = behavior[item_name]
     pct_diff = (current_price - m["reference_price"]) / m["reference_price"]
     adjusted = m["base_sales"] * (1 + m["price_elasticity"] * pct_diff)
     return max(0, int(round(adjusted)))
@@ -111,11 +111,11 @@ def get_day_multiplier(day_of_week: int) -> float:
             4: 1.15, 5: 1.25, 6: 1.20}.get(day_of_week, 1.00)
 
 
-def calculate_item_final_sales(item: Item, behaviour: Dict, unique_products: int,
+def calculate_item_final_sales(item: Item, behavior: Dict, unique_products: int,
                                 weather: str = "cloudy", month: int = 6,
                                 day_of_week: int = 2) -> int:
     """Final daily unit sales with all multipliers applied."""
-    base = calculate_item_sales(item.name, item.price, behaviour)
+    base = calculate_item_sales(item.name, item.price, behavior)
     return max(0, int(round(
         base
         * calculate_choice_multiplier(unique_products)
@@ -136,7 +136,7 @@ def calculate_total_sales(vending_machine: VendingMachine, weather: str = "cloud
     """
     slots = vending_machine.get_slots()
     unique = vending_machine.unique_products()
-    behaviour = generate_customer_behavior(slots)
+    behavior = generate_customer_behavior(slots)
 
     total_revenue = 0.0
     total_cogs = 0.0
@@ -146,7 +146,7 @@ def calculate_total_sales(vending_machine: VendingMachine, weather: str = "cloud
         item = slot.get("item")
         if item is None:
             continue
-        units = calculate_item_final_sales(item, behaviour, unique, weather, month, day_of_week)
+        units = calculate_item_final_sales(item, behavior, unique, weather, month, day_of_week)
         result = vending_machine.sell_item(sid, units)
         if result is None:
             continue
