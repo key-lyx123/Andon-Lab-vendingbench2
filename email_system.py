@@ -83,6 +83,7 @@ class Email:
         self.email_type = email_type
         self.timestamp = timestamp or datetime.utcnow()
         self.read = False
+        self.replied = False  # tracks whether a supplier response was generated
 
     def __repr__(self):
         return f"Email(id={self.email_id}, from={self.sender}, subj={self.subject!r})"
@@ -178,17 +179,15 @@ class EmailSystem:
         from tools import SUPPLIER_TOOLS, execute_supplier_tool  # avoid circular import at module level
 
         # Find outbound emails that haven't been replied to yet
-        replied_ids = {e.email_id for e in self.inbox if hasattr(e, "_reply_to")}
         pending = [
             e for e in self.outbox
-            if e.recipient in SUPPLIERS and e.email_id not in replied_ids
+            if e.recipient in SUPPLIERS and not e.replied
         ]
 
         for out_email in pending:
             supplier_info = SUPPLIERS[out_email.recipient]
             self._handle_supplier_email(out_email, supplier_info, simulation_ref)
-            # Mark as replied by tagging a synthetic attribute
-            out_email._replied = True
+            out_email.replied = True
 
     def _handle_supplier_email(self, email: Email, supplier_info: Dict,
                                 simulation_ref) -> None:

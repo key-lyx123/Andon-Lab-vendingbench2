@@ -42,13 +42,17 @@ class VendingMachine:
     def get_slot(self, slot_id: str) -> dict | None:
         return self.slots.get(slot_id)
 
-    def get_available_slots(self, size_type: str) -> list[str]:
-        """Return slot IDs that can accept more items of the given size."""
+    def get_available_slots(self, size_type: str, item_name: str = "") -> list[str]:
+        """Return slot IDs that can accept more items of the given size.
+
+        If *item_name* is provided, also return slots already holding that item
+        (to allow restocking). Otherwise only return empty slots.
+        """
         return [
             sid for sid, s in self.slots.items()
             if s['size_type'] == size_type
             and s['quantity'] < s['max_capacity']
-            and (s['item'] is None or True)  # allow stacking same item
+            and (s['item'] is None or (item_name and s['item'].name == item_name))
         ]
 
     def total_items(self) -> int:

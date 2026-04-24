@@ -69,7 +69,7 @@ def stock_vending_machine(simulation_ref, item_name: str, quantity: int,
     if slot_id:
         target_slots = [slot_id] if machine.can_stock_item(slot_id, item) else []
     else:
-        target_slots = machine.get_available_slots(item.size)
+        target_slots = machine.get_available_slots(item.size, item_name)
 
     if not target_slots:
         return f"Error: no available slot for '{item_name}' (size={item.size})."
